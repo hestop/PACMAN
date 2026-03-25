@@ -246,7 +246,7 @@ class Grid:
         return tuple(bits)
 
     def _cellIndexToPosition(self, index):
-        x = index / self.height
+        x = index // self.height
         y = index % self.height
         return x, y
 

@@ -584,7 +584,7 @@ def lookup(name, namespace):
         module = __import__(moduleName)
         return getattr(module, objName)
     else:
-        modules = [obj for obj in list(namespace.values()) if str(type(obj)) == "<type 'module'>"]
+        modules = [obj for obj in list(namespace.values()) if str(type(obj)) == "<class 'module'>"]
         options = [getattr(module, name) for module in modules if name in dir(module)]
         options += [obj[1] for obj in list(namespace.items()) if obj[0] == name ]
         if len(options) == 1: return options[0]

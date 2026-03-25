@@ -291,11 +291,10 @@ def _clear_keys(event=None):
     _keyswaiting = {}
     _got_release = None
 
-def keys_pressed(d_o_e=tkinter.dooneevent,
-                 d_w=tkinter.DONT_WAIT):
-    d_o_e(d_w)
+def keys_pressed():
+    _root_window.update()
     if _got_release:
-        d_o_e(d_w)
+            _root_window.update()
     return list(_keysdown.keys())
 
 def keys_waiting():
@@ -313,11 +312,9 @@ def wait_for_keys():
         sleep(0.05)
     return keys
 
-def remove_from_screen(x,
-                       d_o_e=tkinter.dooneevent,
-                       d_w=tkinter.DONT_WAIT):
+def remove_from_screen(x):
     _canvas.delete(x)
-    d_o_e(d_w)
+    _root_window.update()
 
 def _adjust_coords(coord_list, x, y):
     for i in range(0, len(coord_list), 2):
@@ -325,9 +322,7 @@ def _adjust_coords(coord_list, x, y):
         coord_list[i + 1] = coord_list[i + 1] + y
     return coord_list
 
-def move_to(object, x, y=None,
-            d_o_e=tkinter.dooneevent,
-            d_w=tkinter.DONT_WAIT):
+def move_to(object, x, y=None):
     if y is None:
         try: x, y = x
         except: raise Exception('incomprehensible coordinates')
@@ -345,11 +340,9 @@ def move_to(object, x, y=None,
         newCoords.append(coord + inc)
 
     _canvas.coords(object, *newCoords)
-    d_o_e(d_w)
+    _root_window.update()
 
-def move_by(object, x, y=None,
-            d_o_e=tkinter.dooneevent,
-            d_w=tkinter.DONT_WAIT, lift=False):
+def move_by(object, x, y=None, lift=False):
     if y is None:
         try: x, y = x
         except: raise Exception('incomprehensible coordinates')
@@ -366,7 +359,7 @@ def move_by(object, x, y=None,
         newCoords.append(coord + inc)
 
     _canvas.coords(object, *newCoords)
-    d_o_e(d_w)
+    _root_window.update()
     if lift:
         _canvas.tag_raise(object)
 
