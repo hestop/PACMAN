@@ -133,7 +133,7 @@ class EightPuzzleState:
             newrow = row
             newcol = col + 1
         else:
-            raise "Illegal Move"
+            raise Exception("Illegal Move")
 
         # Create a copy of the current eightPuzzle
         newPuzzle = EightPuzzleState([0, 0, 0, 0, 0, 0, 0, 0, 0])
