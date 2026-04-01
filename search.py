@@ -75,29 +75,209 @@ def tinyMazeSearch(problem):
 def depthFirstSearch(problem):
     """
     Search the deepest nodes in the search tree first.
-
-    Your search algorithm needs to return a list of actions that reaches the
-    goal. Make sure to implement a graph search algorithm.
-
-    To get started, you might want to try some of these simple commands to
-    understand the search problem that is being passed in:
-
-    print "Start:", problem.getStartState()
-    print "Is the start a goal?", problem.isGoalState(problem.getStartState())
-    print "Start's successors:", problem.getSuccessors(problem.getStartState())
+    DFS (Depth-First Search) is an algorithm that explores as deeply as possible 
+    along each branch before backtracking to explore alternative paths.
     """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    
+    # ===================================================================
+    # 1. STATE REPRESENTATION
+    # ===================================================================
+    # Each search node is represented as a (state, path) tuple:
+    # - state: the current position (e.g., (x, y) coordinates)
+    # - path: the sequence of actions from the start to the current state
+    
+    start_state = problem.getStartState()
+    start_node = (start_state, [])  # (state, path)
+    
+    # ===================================================================
+    # 2. EXPLORATION
+    # ===================================================================
+    # DFS uses a LIFO (Last In, First Out) strategy.
+    # It explores the most recently added nodes first by using a stack.
+    
+    from util import Stack
+    stack = Stack()  # Stack to store nodes to be explored
+    stack.push(start_node)
+    
+    # Set to record visited states (to avoid revisiting nodes in graph search)
+    explored = set()
+    
+    print(f"Starting DFS: Start state = {start_state}")
+    
+    # ===================================================================
+    # 3. SEARCH ALGORITHM
+    # ===================================================================
+    
+    while not stack.isEmpty():
+        # Pop the node from the stack (deepest node = most recently added)
+        current_state, path = stack.pop()
+        
+        # Check if the current state is the goal
+        if problem.isGoalState(current_state):
+            print(f"DFS Complete: Goal found! Path length = {len(path)}")
+            return path
+        
+        # Skip if this state has already been explored (graph search)
+        if current_state in explored:
+            continue
+            
+        # Mark the current state as explored
+        explored.add(current_state)
+        
+        # Generate all successor nodes from the current state
+        # Example: if current_state = (5, 5),
+        # successors = [((5, 6), 'North', 1), ((6, 5), 'East', 1), ...]
+        successors = problem.getSuccessors(current_state)
+        
+        # Push successors to the stack (in reverse order to preserve correct traversal order)
+        for next_state, action, step_cost in reversed(successors):
+            # Only add states that haven't been explored yet
+            if next_state not in explored:
+                # New path = current path + new action
+                new_path = path + [action]
+                new_node = (next_state, new_path)
+                stack.push(new_node)
+    
+    # If no solution is found
+    print("DFS failed: Goal is unreachable.")
+    return []
+    
 
 def breadthFirstSearch(problem):
-    """Search the shallowest nodes in the search tree first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    """
+    Search the shallowest nodes in the search tree first.
+
+    BFS (Breadth-First Search) is an algorithm that explores nodes 
+    in order of their distance from the start state. It guarantees the shortest path.
+    """
+    
+    # ===================================================================
+    # 1. STATE REPRESENTATION
+    # ===================================================================
+    # Each search node is represented as a (state, path) tuple:
+    # - state: the current position (e.g., (x, y) coordinates)
+    # - path: the sequence of actions from the start to the current state
+    
+    start_state = problem.getStartState()
+    start_node = (start_state, []) # (state, path)
+    
+    # ===================================================================
+    # 2. EXPLORATION
+    # ===================================================================
+    # BFS uses a FIFO (First In, First Out) strategy.
+    # It uses a queue to explore nodes in the order they were added.
+    # This ensures that nodes at shallower depths are explored first.
+        
+    from util import Queue
+    queue = Queue()  # Queue to store nodes to be explored
+    queue.push(start_node)
+    
+    explored = set()
+    print(f"Starting BFS: Start state = {start_state}")
+    
+    # ===================================================================
+    # 3. SEARCH ALGORITHM
+    # ===================================================================
+    
+    while not queue.isEmpty():
+        # Remove the node from the front of the queue (shallowest node)
+        current_state, path = queue.pop()
+        
+        if problem.isGoalState(current_state):
+            print(f"BFS Complete: Goal found! Path length = {len(path)}")
+            return path
+        
+        if current_state in explored:
+            continue
+        explored.add(current_state)
+        
+        successors = problem.getSuccessors(current_state)
+        
+        # Add successors to the queue
+        for next_state, action, step_cost in successors:
+            if next_state not in explored:
+                new_path = path + [action]
+                new_node = (next_state, new_path)
+                queue.push(new_node)
+    
+    print("BFS failed: Goal is unreachable.")
+    return []
+
 
 def uniformCostSearch(problem):
-    """Search the node of least total cost first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    """
+    Search the node of least total cost first.
+    
+    UCS (Uniform Cost Search) is an algorithm that always expands
+    the node with the lowest cumulative path cost. 
+    It uses a priority queue ordered by total cost from the start state.
+    """
+    
+    # ===================================================================
+    # 1. STATE REPRESENTATION
+    # ===================================================================
+    # Each search node is represented as a (state, path, cost) tuple:
+    # - state: the current position (e.g., (x, y) coordinates)
+    # - path: the sequence of actions from the start to the current state
+    # - cost: the cumulative cost from the start state to the current state
+    
+    start_state = problem.getStartState()
+    start_node = (start_state, [], 0)  # (state, path, cost)
+    
+    # ===================================================================
+    # 2. EXPLORATION
+    # ===================================================================
+    # UCS uses a priority queue ordered by cumulative path cost.
+    # It always expands the node with the lowest total cost first.
+    # This guarantees finding the optimal (least-cost) path.
+    
+    from util import PriorityQueue
+    pq = PriorityQueue()  # Priority queue to store nodes to be explored
+    pq.push(start_node, 0)  # push(item, priority) — priority = cumulative cost
+    
+    # Set to record visited states (to avoid revisiting nodes in graph search)
+    explored = set()
+    
+    print(f"Starting UCS: Start state = {start_state}")
+    
+    # ===================================================================
+    # 3. SEARCH ALGORITHM
+    # ===================================================================
+    
+    while not pq.isEmpty():
+        # Pop the node with the lowest cumulative cost
+        current_state, path, current_cost = pq.pop()
+        
+        # Check if the current state is the goal
+        if problem.isGoalState(current_state):
+            print(f"UCS Complete: Goal found! Path length = {len(path)}, Total cost = {current_cost}")
+            return path
+        
+        # Skip if this state has already been explored (graph search)
+        if current_state in explored:
+            continue
+            
+        # Mark the current state as explored
+        explored.add(current_state)
+        
+        # Generate all successor nodes from the current state
+        # Example: if current_state = (5, 5),
+        # successors = [((5, 6), 'North', 1), ((6, 5), 'East', 1), ...]
+        successors = problem.getSuccessors(current_state)
+        
+        # Push successors to the priority queue with their cumulative cost
+        for next_state, action, step_cost in successors:
+            # Only add states that haven't been explored yet
+            if next_state not in explored:
+                # New cumulative cost = current cost + step cost
+                new_cost = current_cost + step_cost
+                new_path = path + [action]
+                new_node = (next_state, new_path, new_cost)
+                pq.push(new_node, new_cost)  # priority = cumulative cost
+    
+    # If no solution is found
+    print("UCS failed: Goal is unreachable.")
+    return []
 
 def nullHeuristic(state, problem=None):
     """
