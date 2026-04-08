@@ -286,10 +286,152 @@ def nullHeuristic(state, problem=None):
     """
     return 0
 
+
+def bestFirstSearch(problem, heuristic=nullHeuristic):
+    """
+    Search the node that has the lowest heuristic value first.
+
+    Best-First Search (Greedy) is an algorithm that always expands
+    the node which appears closest to the goal according to a heuristic
+    function h(n). Unlike UCS, it ignores the cost already paid (g(n)),
+    and unlike A*, it does not combine g(n) with h(n).
+    It is generally fast but neither complete nor optimal.
+    """
+
+    # ===================================================================
+    # 1. STATE REPRESENTATION
+    # ===================================================================
+    # Each search node is represented as a (state, path) tuple:
+    # - state: the current position (e.g., (x, y) coordinates)
+    # - path:  the sequence of actions from the start to the current state
+    #
+    # Note: cumulative cost is NOT stored, because Greedy Best-First
+    # ranks nodes purely by the heuristic h(n).
+
+    start_state = problem.getStartState()
+    start_node = (start_state, [])  # (state, path)
+
+    # ===================================================================
+    # 2. EXPLORATION
+    # ===================================================================
+    # Greedy Best-First uses a priority queue ordered by h(n).
+    # The node with the smallest heuristic value is expanded first.
+
+    from util import PriorityQueue
+    pq = PriorityQueue()
+    pq.push(start_node, heuristic(start_state, problem))
+
+    explored = set()
+    print(f"Starting Best-First Search: Start state = {start_state}")
+
+    # ===================================================================
+    # 3. SEARCH ALGORITHM
+    # ===================================================================
+
+    while not pq.isEmpty():
+        # Pop the node with the lowest heuristic value
+        current_state, path = pq.pop()
+
+        # Check if the current state is the goal
+        if problem.isGoalState(current_state):
+            print(f"Best-First Complete: Goal found! Path length = {len(path)}")
+            return path
+
+        # Skip if this state has already been explored (graph search)
+        if current_state in explored:
+            continue
+
+        # Mark the current state as explored
+        explored.add(current_state)
+
+        # Generate all successors from the current state
+        successors = problem.getSuccessors(current_state)
+
+        # Push successors to the priority queue with priority = h(next_state)
+        for next_state, action, step_cost in successors:
+            if next_state not in explored:
+                new_path = path + [action]
+                new_node = (next_state, new_path)
+                priority = heuristic(next_state, problem)
+                pq.push(new_node, priority)
+
+    # If no solution is found
+    print("Best-First Search failed: Goal is unreachable.")
+    return []
+
+
 def aStarSearch(problem, heuristic=nullHeuristic):
-    """Search the node that has the lowest combined cost and heuristic first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    """
+    Search the node that has the lowest combined cost and heuristic first.
+
+    A* Search expands the node with the smallest f(n) = g(n) + h(n), where
+    - g(n) is the cumulative cost from the start state to n
+    - h(n) is the heuristic estimate of the cost from n to the goal
+    With an admissible (and consistent) heuristic, A* is both complete
+    and optimal, and typically expands fewer nodes than UCS.
+    """
+
+    # ===================================================================
+    # 1. STATE REPRESENTATION
+    # ===================================================================
+    # Each search node is represented as a (state, path, cost) tuple:
+    # - state: the current position (e.g., (x, y) coordinates)
+    # - path:  the sequence of actions from the start to the current state
+    # - cost:  g(n), the cumulative cost from the start state to this state
+
+    start_state = problem.getStartState()
+    start_node = (start_state, [], 0)  # (state, path, cost)
+
+    # ===================================================================
+    # 2. EXPLORATION
+    # ===================================================================
+    # A* uses a priority queue ordered by f(n) = g(n) + h(n).
+    # The priority is the estimated total cost of the cheapest solution
+    # passing through the current node.
+
+    from util import PriorityQueue
+    pq = PriorityQueue()
+    pq.push(start_node, 0 + heuristic(start_state, problem))
+
+    explored = set()
+    print(f"Starting A* Search: Start state = {start_state}")
+
+    # ===================================================================
+    # 3. SEARCH ALGORITHM
+    # ===================================================================
+
+    while not pq.isEmpty():
+        # Pop the node with the lowest f(n) = g(n) + h(n)
+        current_state, path, current_cost = pq.pop()
+
+        # Check if the current state is the goal
+        if problem.isGoalState(current_state):
+            print(f"A* Complete: Goal found! Path length = {len(path)}, "
+                  f"Total cost = {current_cost}")
+            return path
+
+        # Skip if this state has already been explored (graph search)
+        if current_state in explored:
+            continue
+
+        # Mark the current state as explored
+        explored.add(current_state)
+
+        # Generate all successors from the current state
+        successors = problem.getSuccessors(current_state)
+
+        # Push successors with priority = g(next_state) + h(next_state)
+        for next_state, action, step_cost in successors:
+            if next_state not in explored:
+                new_cost = current_cost + step_cost          # g(n')
+                new_path = path + [action]
+                new_node = (next_state, new_path, new_cost)
+                priority = new_cost + heuristic(next_state, problem)  # f(n')
+                pq.push(new_node, priority)
+
+    # If no solution is found
+    print("A* Search failed: Goal is unreachable.")
+    return []
 
 
 # Abbreviations
@@ -297,3 +439,4 @@ bfs = breadthFirstSearch
 dfs = depthFirstSearch
 astar = aStarSearch
 ucs = uniformCostSearch
+bestfs = bestFirstSearch
